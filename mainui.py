@@ -1,11 +1,12 @@
-import webbrowser
+import webbrowser, sys
 
 from PyQt5 import uic
 from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtWidgets import QMainWindow, QWidget
 
-from classes import Mojang, Hypixel_main, GetSettings, SetSettings, CheckSettings
+from classes import Mojang, Hypixel_main, GetSettings, SetSettings, CheckSettings, Hypixel_sw
+from lang import UiLang
 
 
 class Main(QMainWindow):
@@ -16,6 +17,7 @@ class Main(QMainWindow):
         self.download.hide()
 
         self.KEY_API = GetSettings.HypixelAPI()
+        self.flag = 0
 
 
         self.search.clicked.connect(self.newSearchMojang)
@@ -24,14 +26,9 @@ class Main(QMainWindow):
 
         self.search.clicked.connect(self.searchHypixelMain)
         self.search.clicked.connect(self.selectFirst)
+        self.tabWidget_2.currentChanged.connect(self.tabSignal)
         self.setShow.clicked.connect(self.showSettings)
-
-        self.setStyleSheet("""background-color: rgba(251, 215, 252, 1);""")
-        self.search.setStyleSheet("""background-color: green; 
-                                     padding: 7px; border-radius: 10px; 
-                                     border: 2px solid rgba(249, 135, 255, 1);""")
-        self.nickInput.setStyleSheet("""padding: 5px; border-radius: 10px; 
-                                     border: 2px solid rgba(249, 135, 255, 1);""")
+        self.search.clicked.connect(self.remember)
 
         self.nickInput.setText(GetSettings.Nick())
         
@@ -58,7 +55,8 @@ class Main(QMainWindow):
             self.skinView.setPixmap(self.skinmap)
             self.download.show()
         except Exception:
-            self.nickInput.setText("Invalid Player")
+            translate = UiLang(self)
+            self.nickInput.setText(translate.translateErs("Invalid Player"))
             self.uuid = ""
             self.idBar.clear()
             self.skinView.clear()
@@ -80,12 +78,48 @@ class Main(QMainWindow):
             self.guild.clear()
             self.login.clear()
 
+    def searchHypixelSw(self):
+        try:
+            self.hypixelSw = Hypixel_sw(self.KEY_API, self.uuid)
+            textSw = f"""Level: {self.hypixelSw.getLevel()}
+Kills: {self.hypixelSw.getKills()}
+Deaths: {self.hypixelSw.getDeaths()}
+Wins: {self.hypixelSw.getWins()}
+Looses: {self.hypixelSw.getLooses()}
+K/D: {self.hypixelSw.getKd()}
+W/L: {self.hypixelSw.getWl()}"""
+            textRunkedSw = f"""Kills: {self.hypixelSw.getRankedKills()}
+Deaths: {self.hypixelSw.getRankedDeaths()}
+Wins: {self.hypixelSw.getRankedWins()}
+Looses: {self.hypixelSw.getRankedLooses()}
+K/D: {self.hypixelSw.getRankedKd()}
+W/L: {self.hypixelSw.getRankedWl()}"""
+            self.swStats.setFont(QFont('Arial', 14))
+            self.rSwStats.setFont(QFont('Arial', 14))
+            self.swStats.setText(textSw)
+            self.rSwStats.setText(textRunkedSw)
+        except:
+            self.swStats.clear()
+            self.rSwStats.clear()
+
+    def remember(self):
+        if self.rem.isChecked() == True and self.nickInput.text() not in ["Несуществующий Игрок", "Invalid Player"]:
+            SetSettings.setDefaultNick(self.nickInput.text())
+
+    def tabSignal(self):
+        if self.sender().currentIndex() == 1 and self.flag != 1:
+            self.searchHypixelSw()
+        self.flag = 1
+
     def showSettings(self):
         self.set = Settings()
+        translate = UiLang(self.set)
+        translate.translateSettings()
         self.set.show()
 
     def selectFirst(self):
         self.tabWidget_2.setCurrentIndex(0)
+        self.flag = 0
 
 
 class Settings(QWidget):
@@ -93,7 +127,7 @@ class Settings(QWidget):
         super().__init__(parent, QtCore.Qt.Window)
 
         uic.loadUi('uis/settings.ui', self)
-
+        
         self.saveApi.clicked.connect(self.setApi)
         self.saveNick.clicked.connect(self.setNick)
         self.saveLang.clicked.connect(self.setLang)
@@ -106,12 +140,12 @@ class Settings(QWidget):
         if check.keyValid(self.apiEdit.text()):
             SetSettings.setHypixelApi(self.apiEdit.text())
         else:
-            self.apiEdit.setText("Invalid Api")
+            translate = UiLang(self)
+            self.apiEdit.setText(translate.translateErs("Invalid Api"))
 
     def setNick(self):
         SetSettings.setDefaultNick(self.nickEdit.text())
 
     def setLang(self):
         SetSettings.setLang(self.langEdit.currentText())
-        
-
+        sys.exit()

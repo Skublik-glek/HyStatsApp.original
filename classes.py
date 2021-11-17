@@ -1,5 +1,4 @@
 from gevent import monkey as curious_george
-from pkg_resources import resource_exists
 curious_george.patch_all(thread=False, select=False)
 
 import sqlite3, requests, hypixel
@@ -77,6 +76,14 @@ class GetSettings():
         data.close()
         return result[0][0]
 
+    def Lang():
+        data = sqlite3.connect("files/data.db")
+        cur = data.cursor()
+        result = cur.execute("""SELECT value FROM settings 
+                                WHERE name = 'lang'""").fetchall()
+        data.close()
+        return result[0][0]
+
 
 class Mojang():
     def __init__(self, nick):
@@ -89,7 +96,8 @@ class Mojang():
 
     def correct_name(self):
         nicks = requests.get(f"https://api.mojang.com/user/profiles/{self.uuid}/names").json()
-        return nicks[-1]["name"]
+        lastNick = nicks[-1]["name"]
+        return lastNick
 
     def old_names(self):
         return requests.get(f"https://api.mojang.com/user/profiles/{self.uuid}/names").json()
@@ -145,6 +153,79 @@ class Hypixel_main():
             return "<font color='red' size=18>Offline</font>"
         else:
             return "<font color='red' size=18>Online</font>"
+
+
+class Hypixel_sw(Hypixel_main):
+    def __init__(self, key, uuid):
+        super().__init__(key, uuid)
+        self.allSW = requests.get(f"https://api.hypixel.net/player?key={self.key}&uuid={self.uuid}").json()['player']['stats']['SkyWars']
+
+    def getLevel(self):
+        self.lvlSW = self.allSW['levelFormatted']
+        if self.lvlSW[0] == '§':
+            self.lvlSW = self.lvlSW[2::]
+        return str(self.lvlSW)
+    
+    def getCoins(self):
+        self.coinsSW = self.allSW['coins']
+        return str(self.coinsSW)
+
+    def getKills(self):
+        self.killsSW = self.allSW['kills']
+        return str(self.killsSW)
+
+    def getDeaths(self):
+        self.deathsSW = self.allSW['deaths']
+        return str(self.deathsSW)
+
+    def getWins(self):
+        self.winsSW = self.allSW['wins']
+        return str(self.winsSW)
+
+    def getLooses(self):
+        self.loosesSW = self.allSW['losses']
+        return str(self.loosesSW)
+
+    def getKd(self):
+        self.kdSW = float(self.getKills()) / float(self.getDeaths())
+        return str(round(self.kdSW, 2))
+
+    def getWl(self):
+        self.wlSW = SW = float(self.getWins()) / float(self.getDeaths())
+        return str(round(self.wlSW, 2))
+
+    def getRankedKills(self):
+        self.killsRankedSW = self.allSW['kills_ranked']
+        return str(self.killsRankedSW)
+
+    def getRankedDeaths(self):
+        self.deathsRankedSW = self.allSW['deaths_ranked']
+        return str(self.deathsRankedSW)
+
+    def getRankedWins(self):
+        self.winsRankedSW = self.allSW['wins_ranked']
+        return str(self.winsRankedSW)
+
+    def getRankedLooses(self):
+        self.loosesRankedSW = self.allSW['losses_ranked']
+        return str(self.loosesRankedSW)
+
+    def getRankedKd(self):
+        self.kdRankedSW = float(self.getRankedKills()) / float(self.getRankedDeaths())
+        return str(round(self.kdRankedSW, 2))
+
+    def getRankedWl(self):
+        self.wlRankedSW = float(self.getRankedWins()) / float(self.getRankedDeaths())
+        return str(round(self.wlRankedSW, 2))
+
+
+
+
+
+            
+
+
+
         
 
 
