@@ -5,8 +5,11 @@ from PyQt5 import QtCore
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtWidgets import QMainWindow, QWidget
 
-from classes import Mojang, Hypixel_main, GetSettings, SetSettings, CheckSettings, Hypixel_sw
+from classes import Mojang, Hypixel_main, GetSettings, SetSettings, CheckSettings, Hypixel_sw, Hypixel_guilds
 from lang import UiLang
+
+
+GEVENT_SUPPORT=True
 
 
 class Main(QMainWindow):
@@ -25,6 +28,7 @@ class Main(QMainWindow):
         self.download.clicked.connect(lambda: webbrowser.open(f'https://crafatar.com/skins/{self.uuid}'))
 
         self.search.clicked.connect(self.searchHypixelMain)
+        self.gSearch.clicked.connect(self.searchGuildInfo)
         self.search.clicked.connect(self.selectFirst)
         self.tabWidget_2.currentChanged.connect(self.tabSignal)
         self.setShow.clicked.connect(self.showSettings)
@@ -101,6 +105,22 @@ W/L: {self.hypixelSw.getRankedWl()}"""
         except:
             self.swStats.clear()
             self.rSwStats.clear()
+
+    def searchGuildInfo(self):
+        try:
+            guildiInfo = Hypixel_guilds(self.KEY_API, self.guildInput.text())
+            self.guildInput.setText(guildiInfo.getClearGuildName())
+            name = f"{guildiInfo.getGuildName()}"
+            text = f"""\nCoins: {guildiInfo.getCoins()}
+Exp: {guildiInfo.getExp()}
+Rank: {guildiInfo.getRank()}
+Members count: {guildiInfo.getManyMembers()}"""
+            self.gInfo.setFont(QFont('Arial', 16))
+            self.gInfo.setHtml(name)
+            self.gInfo.append(text)
+        except:
+            self.gInfo.clear()
+            self.guildInput.setText("Invalid Guild")
 
     def remember(self):
         if self.rem.isChecked() == True and self.nickInput.text() not in ["Несуществующий Игрок", "Invalid Player"]:

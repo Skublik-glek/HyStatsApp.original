@@ -8,6 +8,9 @@ from PyQt5.QtWidgets import QMainWindow, QWidget
 from classes import GetSettings
 
 
+GEVENT_SUPPORT=True
+
+
 class UiLang():
     def __init__(self, obj):
         self.obj = obj
@@ -46,9 +49,3 @@ class UiLang():
         self.obj.saveApi.setText(self.changeText('Save'))
         self.obj.saveLang.setText(self.changeText('Save'))
         self.obj.saveNick.setText(self.changeText('Save'))
-
-
-        
-
-        
- 

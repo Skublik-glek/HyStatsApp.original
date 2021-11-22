@@ -6,6 +6,9 @@ import sqlite3, requests, hypixel
 from urllib import request
 
 
+GEVENT_SUPPORT=True
+
+
 class CheckSettings():
     def __init__(self):
         pass
@@ -143,7 +146,10 @@ class Hypixel_main():
         try:
             p = " "
             self.ginfo = requests.get(f"https://api.hypixel.net/guild?key={self.key}&player={self.uuid}").json()
-            tag = f"<font color='{self.ginfo['guild']['tagColor'].replace('_', p)}' size=18>{self.ginfo['guild']['tag']}</font>"
+            try:
+                tag = f"<font color='{self.ginfo['guild']['tagColor'].replace('_', p)}' size=18>{self.ginfo['guild']['tag']}</font>"
+            except:
+                tag = ""
             return f"<font size=18>{self.ginfo['guild']['name']}</font> {tag}"
         except Exception:
             return "<font color='red' size=18>Is not in a guild</font>"
@@ -219,18 +225,39 @@ class Hypixel_sw(Hypixel_main):
         return str(round(self.wlRankedSW, 2))
 
 
-
-
-
-            
-
-
-
-        
-
-
-
-
+class Hypixel_guilds():
+    def __init__(self, key, name):
+        self.key = key
+        self.name = name
+        self.guildInfo = requests.get(f"https://api.hypixel.net/guild?key={key}&name={name}").json()['guild']
     
+    def getClearGuildName(self):
+        print(self.guildInfo['name'])
+        return str(self.guildInfo['name'])
 
-        
+    def getGuildName(self):
+        p = " "
+        try:
+            tag = f"<font color='{self.guildInfo['tagColor'].replace('_', p)}'>{self.guildInfo['tag']}</font>"
+        except:
+            tag = ""
+        return f"<font>{self.guildInfo['name']}</font> {tag}"
+
+    def getCoins(self):
+        return str(self.guildInfo['coinsEver'])
+
+    def getExp(self):
+        return str(self.guildInfo['exp'])
+
+    def getRank(self):
+        try:
+            rank = self.guildInfo['legacyRanking']
+        except:
+            rank = "None"
+        return str(rank)
+
+    def getManyMembers(self):
+        return str(len(self.guildInfo['members']))
+
+    def getListMembers(self):
+        return str(self.guildInfo['members'])
