@@ -10,6 +10,7 @@ from lang import UiLang
 
 KEY_API = GetSettings.HypixelAPI()
 GEVENT_SUPPORT=True
+# hi git
 
 try:
     from PyQt5.QtWinExtras import QtWin                                        
